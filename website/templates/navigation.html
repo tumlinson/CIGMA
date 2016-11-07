@@ -1,0 +1,6 @@
+<div class="navigation">
+  {% if nav['prev'] %} <a href="{{ url_for('source', source_id=nav['first']) }}">|<<</a> {% else %}<em>|<<</em>{% endif %} &nbsp;
+  {% if nav['prev'] %} <a href="{{ url_for('source', source_id=nav['prev']) }}"><</a> {% else %}<em><</em>{% endif %} &nbsp;
+  {% if nav['next'] %} <a href="{{ url_for('source', source_id=nav['next']) }}">></a> {% else %}<em>></em>{% endif %} &nbsp;
+  {% if nav['next'] %} <a href="{{ url_for('source', source_id=nav['last']) }}">>>|</a> {% else %}<em>>>|</em>{% endif %}
+</div>

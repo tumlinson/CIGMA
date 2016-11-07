@@ -1,0 +1,6 @@
+website/build
+website/build/*
+website/build/static/img/*
+website/static/img/*.jpg
+*.pyc
+*.pkl

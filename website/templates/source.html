@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block content %}
+   {% include 'navigation.html' %}
+   <div class="source">
+     <h1>Source #{{ source_id }}</h1>
+     <table border="1">
+        {% for key in nav['keys'] %}
+          <tr>
+          <td>{{ key }}</td>
+          <td>{{ data[key] }}</td>
+          </tr>
+        {% endfor %}
+     </table>
+     <br>
+     <p>SDSS</br>
+     {% if url_for('static', filename='img/' + data['sdss_thumbnail']) %}
+     <img src="{{ url_for('static', filename='img/' + data['sdss_thumbnail']) }}", height="256", width="256"></p>
+     {% else %}
+     <img src="", height="256", width="256"></p>
+     {% endif %}
+   </div>
+   {% include 'navigation.html' %}
+{% endblock %}

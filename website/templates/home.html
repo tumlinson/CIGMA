@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="home">
+    <h1>CIGMA Main Page</h1>
+    <p>This website was built with Python via the Flask framework.</p>
+    <p><a href="{{ url_for('source', source_id=0) }}">Look at the sources...</a></p>
+  </div>
+{% endblock %}
