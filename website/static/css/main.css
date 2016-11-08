@@ -59,6 +59,14 @@ div.home {
           border-radius: 6px;
 }
 
+div.doc {
+  padding: 10px 0 30px 10px;
+  background-color: #E6E6FA;
+  -webkit-border-radius: 6px;
+     -moz-border-radius: 6px;
+          border-radius: 6px;
+}
+
 div.about {
   padding: 10px 0 30px 10px;
   background-color: #E6E6FA;

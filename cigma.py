@@ -166,6 +166,9 @@ def parse_master(dir='/astro/tumlinson/CIGMA/COS-Dwarfs/'):
 
 
 def cigma(pickle_file='website/cigma_data.pkl', host_only=False, static=False):
+    '''
+    Main documentation string is here.
+    '''
     if not host_only:
         # Skim data:
         t = parse_master()

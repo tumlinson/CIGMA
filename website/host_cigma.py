@@ -3,13 +3,14 @@
 import numpy as np
 import pickle
 import os
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, send_from_directory
 from flask_frozen import Freezer
 
 # Global table data variable:
 t = None
 
 app = Flask(__name__)
+app.config['DOC_FOLDER'] = os.path.join(os.path.dirname(__file__), 'doc/build/html/')
 freezer = Freezer(app)
 
 @app.route('/')
@@ -55,6 +56,21 @@ def load_data(pickle_file):
     with open(pickle_file, 'r') as f:
         t = pickle.load(f)
     t = t.to_dict(orient='index')
+
+@freezer.register_generator
+def doc():
+    all_files = []
+    for root, dirs, files in os.walk(app.config['DOC_FOLDER']):
+        root = root[len(app.config['DOC_FOLDER']):]
+        for name in files:
+            if name[0] != '.':
+                all_files.append({'filename': os.path.join(root, name)})
+    return all_files
+
+@app.route('/doc/')
+@app.route('/doc/<path:filename>')
+def doc(filename='index.html'):
+    return send_from_directory(app.config['DOC_FOLDER'], filename)
 
 def host_cigma(pickle_file='./cigma_data.pkl', static=False):
     '''
