@@ -12,12 +12,18 @@
         {% endfor %}
      </table>
      <br>
-     <p>SDSS</br>
+     <p>SDSS / Plots<br>
      {% if url_for('static', filename='img/' + data['sdss_thumbnail']) %}
-     <img src="{{ url_for('static', filename='img/' + data['sdss_thumbnail']) }}", height="256", width="256"></p>
+     <img src="{{ url_for('static', filename='img/' + data['sdss_thumbnail']) }}", height="256", width="256">
      {% else %}
-     <img src="", height="256", width="256"></p>
-     {% endif %}
+     <img src="", height="256", width="256">
+     {% endif %}&nbsp;&nbsp;
+     {% if url_for('static', filename='img/' + data['shortsum_png']) %}
+     <img src="{{ url_for('static', filename='img/' + data['shortsum_png']) }}", height="900", width="500">
+     {% else %}
+     <img src="//:0", height="900", width="500">
+     {% endif %}</p>
+
    </div>
    {% include 'navigation.html' %}
 {% endblock %}

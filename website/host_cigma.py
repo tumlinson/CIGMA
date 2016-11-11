@@ -36,6 +36,7 @@ def source(source_id):
         keys.sort()
         #data['sdss_thumbnail'] = url_for('static', filename='img/' + os.path.basename(data['sdss_thumbnail']))
         data['sdss_thumbnail'] = os.path.basename(data['sdss_thumbnail'])
+        data['shortsum_png'] = os.path.basename(data['shortsum_png'])
         
         current = np.where(np.array(t.keys()) == source_id)[0][0]
         if current == t.keys()[0]:

@@ -6,6 +6,7 @@ import os
 #from astropy.table import Table
 import pandas
 import glob
+import subprocess
 from website.host_cigma import host_cigma
 
 __version__ = '0.1'
@@ -104,6 +105,20 @@ def get_thumbnail(qso, galname):
     return sdss_thumbnail(ra + dx, dec + dy, dest_dir='website/static/img/')
 
 
+def get_shortsum_png(pdf_file, dest_dir='website/static/img/', clobber=False):
+    # Use a different destination directory?
+    
+    print pdf_file
+    outname = os.path.join(dest_dir, os.path.basename(pdf_file[0:-4] + '.png'))
+    # Recreate PNG if clobber=True, PNG does not exist, or PDF is newer than existing PNG:
+    if clobber or not os.access(outname, os.F_OK) or os.path.getmtime(pdf_file) > os.path.getmtime(outname):
+        ret_status = subprocess.call(
+            ['convert', '-density', '400', pdf_file, '-resize', '25%', '-quality', '90', outname])
+        if ret_status != 0:
+            raise IOError('Unable to convert PDF file to PNG (error status {}):\n    {:s}'.format(
+                ret_status, pdf_file))
+    return outname
+
 def parse_master(dir='/astro/tumlinson/CIGMA/COS-Dwarfs/'):
     master_file = os.path.join(dir, 'systems_to_calculate_dwarfs')
     
@@ -116,6 +131,7 @@ def parse_master(dir='/astro/tumlinson/CIGMA/COS-Dwarfs/'):
     t['dir'] = ''
     t['lst'] = ''
     t['shortsum'] = ''
+    t['shortsum_png'] = ''
     t['redshift_file'] = ''
     t['redshift'] = ''
     t['sdss_thumbnail'] = ''
@@ -143,6 +159,7 @@ def parse_master(dir='/astro/tumlinson/CIGMA/COS-Dwarfs/'):
                 raise IOerror('More than one shortsum PDF plot found!  {}'.format(searchstr))
             else:
                 t['shortsum'][i] = 'UNDEFINED'
+        t['shortsum_png'][i] = get_shortsum_png(t['shortsum'][i])
         t['sdss_thumbnail'][i] = get_thumbnail(t['qso'][i], t['galname'][i])
     
     t.set_index('index', inplace=True)

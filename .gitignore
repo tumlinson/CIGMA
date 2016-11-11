@@ -2,6 +2,7 @@ website/build
 website/build/*
 website/build/static/img/*
 website/static/img/*.jpg
+website/static/img/*.png
 website/doc/build
 *.pyc
 *.pkl
