@@ -88,7 +88,7 @@ def resolve_name(qso='J1059+2517'):
     return ra, dec
 
 
-def get_thumbnail(qso, galname):
+def get_thumbnail(qso, galname, config):
     print 'Working on thumbnails for qso {:s}...'.format(qso)
     try:
         ra, dec = resolve_name(qso)
@@ -102,16 +102,16 @@ def get_thumbnail(qso, galname):
     dy = dist * np.cos(np.deg2rad(posang)) / 3600.  # deg
     #print 'dx={}\tdy={}'.format(dx, dy)
     
-    return sdss_thumbnail(ra + dx, dec + dy, dest_dir='website/static/img/')
+    return sdss_thumbnail(ra + dx, dec + dy, config['img_dir'], clobber=config['clobber_sdss_thumbnail'])
 
 
-def get_shortsum_png(pdf_file, dest_dir='website/static/img/', clobber=False):
+def get_shortsum_png(pdf_file, config):
     # Use a different destination directory?
     
     print pdf_file
-    outname = os.path.join(dest_dir, os.path.basename(pdf_file[0:-4] + '.png'))
+    outname = os.path.join(config['img_dir'], os.path.basename(pdf_file[0:-4] + '.png'))
     # Recreate PNG if clobber=True, PNG does not exist, or PDF is newer than existing PNG:
-    if clobber or not os.access(outname, os.F_OK) or os.path.getmtime(pdf_file) > os.path.getmtime(outname):
+    if config['clobber_shortsum_png'] or not os.access(outname, os.F_OK) or os.path.getmtime(pdf_file) > os.path.getmtime(outname):
         ret_status = subprocess.call(
             ['convert', '-density', '400', pdf_file, '-resize', '25%', '-quality', '90', outname])
         if ret_status != 0:
@@ -119,8 +119,10 @@ def get_shortsum_png(pdf_file, dest_dir='website/static/img/', clobber=False):
                 ret_status, pdf_file))
     return outname
 
-def parse_master(dir='/astro/tumlinson/CIGMA/COS-Dwarfs/'):
-    master_file = os.path.join(dir, 'systems_to_calculate_dwarfs')
+
+def parse_master(config):
+    dir = config['cos_dwarfs_dir']
+    master_file = os.path.join(dir, config['cos_dwarfs_master_file'])
     
     t = pandas.read_table(master_file, 
         comment='#', 
@@ -159,8 +161,8 @@ def parse_master(dir='/astro/tumlinson/CIGMA/COS-Dwarfs/'):
                 raise IOerror('More than one shortsum PDF plot found!  {}'.format(searchstr))
             else:
                 t['shortsum'][i] = 'UNDEFINED'
-        t['shortsum_png'][i] = get_shortsum_png(t['shortsum'][i])
-        t['sdss_thumbnail'][i] = get_thumbnail(t['qso'][i], t['galname'][i])
+        t['shortsum_png'][i] = get_shortsum_png(t['shortsum'][i], config)
+        t['sdss_thumbnail'][i] = get_thumbnail(t['qso'][i], t['galname'][i], config)
     
     t.set_index('index', inplace=True)
     
@@ -182,37 +184,58 @@ def parse_master(dir='/astro/tumlinson/CIGMA/COS-Dwarfs/'):
 #        i.alpha_channel = 'remove'          # Remove transparency and replace with bg.
 
 
-def cigma(pickle_file='website/cigma_data.pkl', host_only=False, static=False):
+def read_config(config_file):
+    '''
+    Parse configuration file into dictionary.
+    '''
+    import yaml
+    
+    with open(config_file, 'r') as file:
+        config = yaml.load(file)
+    return config
+
+
+def cigma(config_file, host_only=False, static=False):
     '''
     Main documentation string is here.
+    
+    The config file must contain the following keys:
+        pickle_file                    [str]
+        cos_dwarfs_dir                 [str]
+        cos_dwarfs_master_file         [str]
+        img_dir                        [str]      
+        clobber_sdss_thumbnail         [bool]
+        clobber_shortsum_png           [bool]
     '''
+    config = read_config(config_file)
+    
     if not host_only:
         # Skim data:
-        t = parse_master()
-        t.to_pickle(args.pickle_file)
+        t = parse_master(config)
+        t.to_pickle(config['pickle_file'])
         
         for x in t['shortsum']:
             print x
     
     # Host the Flask website:
-    host_cigma(args.pickle_file, static=static)
+    host_cigma(pickle_file=config['pickle_file'], static=static)
 
 
 if __name__ == '__main__':
     import argparse
     
-    default_pickle_file = 'website/cigma_data.pkl'
+    default_config_file = 'cigma_config.yml'
     
     parser = argparse.ArgumentParser(
         description='Skim data and host the CIGMA website.', 
         epilog='Version {:s}; Written by {:s}'.format(__version__, __author__))
-    parser.add_argument('-p', dest='pickle_file', type=str, 
-        help='Pickle file containing data [default={:s}]'.format(default_pickle_file), 
-        default=default_pickle_file)
+    parser.add_argument('-c', dest='config_file', type=str, 
+        help='YAML file containing data [default={:s}]'.format(default_config_file), 
+        default=default_config_file)
     parser.add_argument('--host', dest='host', action='store_true', 
         help='Only host the CIGMA website.')
     parser.add_argument('-s', '--static', dest='static', default=False, action='store_true', 
         help='Build static pages rather than hosting a dynamic webserver. [default=False]')
     args = parser.parse_args()
     
-    cigma(args.pickle_file, host_only=args.host, static=args.static)
+    cigma(args.config_file, host_only=args.host, static=args.static)

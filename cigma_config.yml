@@ -1,0 +1,6 @@
+'pickle_file'            : 'website/cigma_data.pkl'
+'cos_dwarfs_dir'         : '/astro/tumlinson/CIGMA/COS-Dwarfs/'
+'cos_dwarfs_master_file' : 'systems_to_calculate_dwarfs'
+'img_dir'                : 'website/static/img/'
+'clobber_sdss_thumbnail' : False
+'clobber_shortsum_png'   : False
